@@ -33,7 +33,6 @@
 #include <stdint.h>
 
 #include "BlinkerTask.h"
-#include "CarPositioningTask.h"
 
 
 // /////////////////////////////////////////////////////////////////////////////
@@ -47,8 +46,6 @@
 
 // Application Tasks
 BlinkerTask gvBlinkerTask;
-CarPositioningTask gvCarOnePositioningTask(1);
-CarPositioningTask gvCarTwoPositioningTask(2);
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -56,13 +53,14 @@ void setup(void)
 {
     // Debug console
     Serial.begin(115200);
+    Serial.println("ENTER: setup()");
 
     // Bring up the application tasks
-    gvBlinkerTask.initialize();
-    gvCarOnePositioningTask.initialize();
-    gvCarTwoPositioningTask.initialize();
+    gvBlinkerTask.Initialize();
 
     // FreeRTOS task scheduler takes over from here.
+    Serial.println("LEAVE: setup()");
+    Serial.println("FreeRTOS Scheduler Running...");
     return;
 }
 
