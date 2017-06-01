@@ -50,7 +50,7 @@ TODO: Talk about the 7-segment marquee display
 [@granfarr](https://github.com/granfarr).
 
 ## Contribute
-[Open an issue](https://github.com/granfarr/knew-elevator/issues/new) or submit PRs.
+[Open an issue](https://github.com/granfarr/knex-elevator/issues/new) or submit PRs.
 
 
 ## License

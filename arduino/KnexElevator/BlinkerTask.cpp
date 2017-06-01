@@ -30,6 +30,7 @@
 // /////////////////////////////////////////////////////////////////////////////
 #include <Arduino_FreeRTOS.h>
 #include <Arduino.h>
+
 #include "BlinkerTask.h"
 
 
@@ -54,15 +55,15 @@ BlinkerTask::~BlinkerTask(void)
 
 ////////////////////////////////////////////////////////////////////////////////
 void
-BlinkerTask::initialize(void)
+BlinkerTask::Initialize(void)
 {
     // Setup the debug LED for writing
     pinMode(13, OUTPUT);
     pinMode(2, INPUT_PULLUP);
 
     // Fire up our task
-    xTaskCreate(BlinkerTask::runWrapper,  // Entry Point
-                "Main",                   // Task Name
+    xTaskCreate(BlinkerTask::RunWrapper,  // Entry Point
+                "BlinkerTask",            // Task Name
                 128,                      // Stack Depth
                 this,                     // Task Parameters
                 2,                        // Priority
@@ -70,19 +71,19 @@ BlinkerTask::initialize(void)
 }
 
 
-
 ////////////////////////////////////////////////////////////////////////////////
 void
-BlinkerTask::runWrapper(void * pvParameters)
+BlinkerTask::RunWrapper(void * pvParameters)
 {
     // Entry point to the new task
-    BlinkerTask* p_this = reinterpret_cast<BlinkerTask*>(pvParameters);
-    p_this->run();
+    BlinkerTask* thisTask = reinterpret_cast<BlinkerTask*>(pvParameters);
+    thisTask->Run();
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////
 void
-BlinkerTask::run(void)
+BlinkerTask::Run(void)
 {
     while (true)
     {
