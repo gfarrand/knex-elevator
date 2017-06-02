@@ -32,6 +32,7 @@
 #include <Arduino.h>
 
 #include "DataAcquisitionTask.h"
+#include "SerialPortResource.h"
 
 
 // /////////////////////////////////////////////////////////////////////////////
@@ -57,8 +58,10 @@ DataAcquisitionTask::~DataAcquisitionTask(void)
 void
 DataAcquisitionTask::Initialize(void)
 {
+    SerialPortResource.Acquire();
     Serial.print("ENTER: ");
     Serial.println(__PRETTY_FUNCTION__);
+    SerialPortResource.Release();
 
     // Fire up our task
     xTaskCreate(DataAcquisitionTask::RunWrapper,  // Entry Point
@@ -68,8 +71,10 @@ DataAcquisitionTask::Initialize(void)
                 2,                                // Priority
                 NULL);                            // Storage for task handle
 
+    SerialPortResource.Acquire();
     Serial.print("LEAVE: ");
     Serial.println(__PRETTY_FUNCTION__);
+    SerialPortResource.Release();
 }
 
 
@@ -88,8 +93,10 @@ DataAcquisitionTask::RunWrapper(void * pvParameters)
 void
 DataAcquisitionTask::Run(void)
 {
+    SerialPortResource.Acquire();
     Serial.print("ENTER: ");
     Serial.println(__PRETTY_FUNCTION__);
+    SerialPortResource.Release();
 
     while (true)
     {
@@ -98,9 +105,11 @@ DataAcquisitionTask::Run(void)
                  sizeof(timeStampStringBuf),
                  "[%09li]",
                  micros());
+        SerialPortResource.Acquire();
         Serial.print(timeStampStringBuf);
         Serial.print(" Hello from ");
         Serial.println(__PRETTY_FUNCTION__);
+        SerialPortResource.Release();
 
         // And print again in a second
         vTaskDelay(pdMS_TO_TICKS(1000));
@@ -108,6 +117,7 @@ DataAcquisitionTask::Run(void)
 
     Serial.print("LEAVE: ");
     Serial.println(__PRETTY_FUNCTION__);
+    SerialPortResource.Release();
 }
 
 

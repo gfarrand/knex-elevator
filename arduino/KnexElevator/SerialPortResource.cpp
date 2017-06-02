@@ -31,101 +31,43 @@
 #include <Arduino_FreeRTOS.h>
 #include <Arduino.h>
 
-#include "BlinkerTask.h"
 #include "SerialPortResource.h"
 
 
 // /////////////////////////////////////////////////////////////////////////////
-// Local Types
+// Module Variable(s)
 // /////////////////////////////////////////////////////////////////////////////
+SerialPortResourceClass SerialPortResource;
 
 
 ////////////////////////////////////////////////////////////////////////////////
-BlinkerTask::BlinkerTask(void)
+SerialPortResourceClass::SerialPortResourceClass(void)
+    : mMutex()
+{
+    mMutex = xSemaphoreCreateMutex();
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+SerialPortResourceClass::~SerialPortResourceClass(void)
 {
     // Intentionally left empty
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
-BlinkerTask::~BlinkerTask(void)
+void
+SerialPortResourceClass::Acquire(void)
 {
-    // Intentionally left empty
+    xSemaphoreTake(mMutex, portMAX_DELAY);
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
 void
-BlinkerTask::Initialize(void)
+SerialPortResourceClass::Release(void)
 {
-    SerialPortResource.Acquire();
-    Serial.print("ENTER: ");
-    Serial.println(__PRETTY_FUNCTION__);
-    SerialPortResource.Release();
-
-    // Setup the debug LED for writing
-    pinMode(13, OUTPUT);
-    pinMode(2, INPUT_PULLUP);
-
-    // Fire up our task
-    xTaskCreate(BlinkerTask::RunWrapper,  // Entry Point
-                "BlinkerTask",            // Task Name
-                128,                      // Stack Depth
-                this,                     // Task Parameters
-                2,                        // Priority
-                NULL);                    // Storage for task handle
-
-    SerialPortResource.Acquire();
-    Serial.print("LEAVE: ");
-    Serial.println(__PRETTY_FUNCTION__);
-    SerialPortResource.Release();
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-void
-BlinkerTask::RunWrapper(void * pvParameters)
-{
-    // Entry point to the new task
-    BlinkerTask* thisTask =
-        reinterpret_cast<BlinkerTask*>(pvParameters);
-    thisTask->Run();
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-void
-BlinkerTask::Run(void)
-{
-    SerialPortResource.Acquire();
-    Serial.print("ENTER: ");
-    Serial.println(__PRETTY_FUNCTION__);
-    SerialPortResource.Release();
-
-    while (true)
-    {
-        // Light the debug LED when the button is pressed
-        int buttonState = digitalRead(2);
-        int ledState = (LOW == buttonState) ? HIGH : LOW;
-        digitalWrite(13, ledState);
-
-        // Print on button press
-        if (LOW == buttonState)
-        {
-            SerialPortResource.Acquire();
-            Serial.print("Button Pressed! ");
-            Serial.println(__PRETTY_FUNCTION__);
-            SerialPortResource.Release();
-        }
-
-        // And check back again soon
-        vTaskDelay(pdMS_TO_TICKS(250));
-    }
-
-    SerialPortResource.Acquire();
-    Serial.print("LEAVE: ");
-    Serial.println(__PRETTY_FUNCTION__);
-    SerialPortResource.Release();
+    xSemaphoreGive(mMutex);
 }
 
 
