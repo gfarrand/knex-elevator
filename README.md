@@ -47,7 +47,10 @@ TODO: Talk about the 7-segment marquee display
 
 
 ## Maintainers
-[@granfarr](https://github.com/granfarr).
+* [@gfarrand](https://github.com/gfarrand).
+* [@DizzyBytes](https://github.com/DizzyBytes).
+* [@saunmeht](https://github.com/saunmeht).
+* [@sudhirmenon91](https://github.com/sudhirmenon91).
 
 ## Contribute
 [Open an issue](https://github.com/granfarr/knex-elevator/issues/new) or submit PRs.
