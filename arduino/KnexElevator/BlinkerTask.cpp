@@ -57,6 +57,9 @@ BlinkerTask::~BlinkerTask(void)
 void
 BlinkerTask::Initialize(void)
 {
+    Serial.print("ENTER: ");
+    Serial.println(__PRETTY_FUNCTION__);
+
     // Setup the debug LED for writing
     pinMode(13, OUTPUT);
     pinMode(2, INPUT_PULLUP);
@@ -68,6 +71,9 @@ BlinkerTask::Initialize(void)
                 this,                     // Task Parameters
                 2,                        // Priority
                 NULL);                    // Storage for task handle
+
+    Serial.print("LEAVE: ");
+    Serial.println(__PRETTY_FUNCTION__);
 }
 
 
@@ -76,7 +82,8 @@ void
 BlinkerTask::RunWrapper(void * pvParameters)
 {
     // Entry point to the new task
-    BlinkerTask* thisTask = reinterpret_cast<BlinkerTask*>(pvParameters);
+    BlinkerTask* thisTask =
+        reinterpret_cast<BlinkerTask*>(pvParameters);
     thisTask->Run();
 }
 
@@ -85,6 +92,9 @@ BlinkerTask::RunWrapper(void * pvParameters)
 void
 BlinkerTask::Run(void)
 {
+    Serial.print("ENTER: ");
+    Serial.println(__PRETTY_FUNCTION__);
+
     while (true)
     {
         // Light the debug LED when the button is pressed
@@ -95,6 +105,9 @@ BlinkerTask::Run(void)
         // And check back again in 5 milliseconds
         vTaskDelay(pdMS_TO_TICKS(5));
     }
+
+    Serial.print("LEAVE: ");
+    Serial.println(__PRETTY_FUNCTION__);
 }
 
 
