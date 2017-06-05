@@ -26,56 +26,88 @@
 
 
 // /////////////////////////////////////////////////////////////////////////////
-// Include File(s)
+// Include(s)
 // /////////////////////////////////////////////////////////////////////////////
 #include <Arduino_FreeRTOS.h>
 #include <Arduino.h>
-#include <stdint.h>
 
-#include "BlinkerTask.h"
 #include "DataAcquisitionTask.h"
 
 
 // /////////////////////////////////////////////////////////////////////////////
-// Function Prototypes
+// Local Types
 // /////////////////////////////////////////////////////////////////////////////
-
-
-// /////////////////////////////////////////////////////////////////////////////
-// Application Global Variable(s)
-// /////////////////////////////////////////////////////////////////////////////
-
-// Application Tasks
-BlinkerTask gvBlinkerTask;
-DataAcquisitionTask gvDataAcquisitionTask;
 
 
 ////////////////////////////////////////////////////////////////////////////////
-void setup(void)
+DataAcquisitionTask::DataAcquisitionTask(void)
 {
-    // Debug console
-    Serial.begin(115200);
-    Serial.print("ENTER: ");
-    Serial.println(__PRETTY_FUNCTION__);
+    // Intentionally left empty
+}
 
-    // Bring up the application tasks
-    gvBlinkerTask.Initialize();
-    gvDataAcquisitionTask.Initialize();
 
-    // FreeRTOS task scheduler takes over from here.
-    Serial.print("LEAVE: ");
-    Serial.println(__PRETTY_FUNCTION__);
-    Serial.println("FreeRTOS Scheduler Running...");
-    return;
+////////////////////////////////////////////////////////////////////////////////
+DataAcquisitionTask::~DataAcquisitionTask(void)
+{
+    // Intentionally left empty
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
 void
-loop(void)
+DataAcquisitionTask::Initialize(void)
 {
-    // NTD
-    // Task scheduler is doing all the magic
+    Serial.print("ENTER: ");
+    Serial.println(__PRETTY_FUNCTION__);
+
+    // Fire up our task
+    xTaskCreate(DataAcquisitionTask::RunWrapper,  // Entry Point
+                "DataAcquisitionTask",            // Task Name
+                128,                              // Stack Depth
+                this,                             // Task Parameters
+                2,                                // Priority
+                NULL);                            // Storage for task handle
+
+    Serial.print("LEAVE: ");
+    Serial.println(__PRETTY_FUNCTION__);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+void
+DataAcquisitionTask::RunWrapper(void * pvParameters)
+{
+    // Entry point to the new task
+    DataAcquisitionTask* thisTask =
+        reinterpret_cast<DataAcquisitionTask*>(pvParameters);
+    thisTask->Run();
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+void
+DataAcquisitionTask::Run(void)
+{
+    Serial.print("ENTER: ");
+    Serial.println(__PRETTY_FUNCTION__);
+
+    while (true)
+    {
+        char timeStampStringBuf[15+1];
+        snprintf(timeStampStringBuf,
+                 sizeof(timeStampStringBuf),
+                 "[%09li]",
+                 micros());
+        Serial.print(timeStampStringBuf);
+        Serial.print(" Hello from ");
+        Serial.println(__PRETTY_FUNCTION__);
+
+        // And print again in a second
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+
+    Serial.print("LEAVE: ");
+    Serial.println(__PRETTY_FUNCTION__);
 }
 
 
