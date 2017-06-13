@@ -31,58 +31,75 @@
 #include <Arduino_FreeRTOS.h>
 #include <Arduino.h>
 
-#include "BlinkerTask.h"
+#include "ITask.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////
-BlinkerTask::BlinkerTask(void)
-    : ITask(__FUNCTION__)
+ITask::ITask(char const * taskName, int taskPriority, int stackDepth)
+    : mTaskName()
+    , mTaskPriority(taskPriority)
+    , mTaskStackDepth(stackDepth)
+    , mTaskHandle(NULL)
+{
+    strncpy(mTaskName, taskName, sizeof(mTaskName));
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+ITask::~ITask(void)
 {
     // Intentionally left empty
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
-BlinkerTask::~BlinkerTask(void)
+char const*
+ITask::Name(void) const
 {
-    // Intentionally left empty
+    return mTaskName;
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
 void
-BlinkerTask::Initialize(void)
+ITask::Start(void)
 {
-    // Setup the debug LED for writing
-    pinMode(13, OUTPUT);
-    pinMode(2, INPUT_PULLUP);
+    Serial.print("Now starting task '");
+    Serial.print(mTaskName);
+    Serial.println("'");
+
+    // Fire up our task
+    xTaskCreate(ITask::RunWrapper,
+                mTaskName,
+                mTaskStackDepth,
+                this,
+                mTaskPriority,
+                &mTaskHandle);
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
 void
-BlinkerTask::Run(void)
+ITask::Stop(void)
 {
-    Serial.print("ENTER: ");
-    Serial.println(__PRETTY_FUNCTION__);
+    Serial.print("Now stopping task '");
+    Serial.print(mTaskName);
+    Serial.println("'");
 
-    while (true)
-    {
-        // Light the debug LED when the button is pressed
-        int buttonState = digitalRead(2);
-        int ledState = (LOW == buttonState) ? HIGH : LOW;
-        digitalWrite(13, ledState);
+    // Remove our task from execution
+    vTaskDelete(mTaskHandle);
+    mTaskHandle = NULL;
+}
 
-        // Print on button press
-        if (LOW == buttonState)
-        {
-            Serial.print("Button Pressed! ");
-            Serial.println(__PRETTY_FUNCTION__);
-        }
 
-        // And check back again soon
-        vTaskDelay(pdMS_TO_TICKS(250));
-    }
+////////////////////////////////////////////////////////////////////////////////
+void
+ITask::RunWrapper(void * taskParameters)
+{
+    // Entry point to the new task
+    ITask* thisTask =
+        reinterpret_cast<ITask*>(taskParameters);
+    thisTask->Run();
 }
 
 

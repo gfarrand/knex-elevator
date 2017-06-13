@@ -34,13 +34,9 @@
 #include "DataAcquisitionTask.h"
 
 
-// /////////////////////////////////////////////////////////////////////////////
-// Local Types
-// /////////////////////////////////////////////////////////////////////////////
-
-
 ////////////////////////////////////////////////////////////////////////////////
 DataAcquisitionTask::DataAcquisitionTask(void)
+    : ITask(__FUNCTION__, ITask::Defaults::Priority, 200)
 {
     // Intentionally left empty
 }
@@ -57,30 +53,7 @@ DataAcquisitionTask::~DataAcquisitionTask(void)
 void
 DataAcquisitionTask::Initialize(void)
 {
-    Serial.print("ENTER: ");
-    Serial.println(__PRETTY_FUNCTION__);
-
-    // Fire up our task
-    xTaskCreate(DataAcquisitionTask::RunWrapper,  // Entry Point
-                "DataAcquisitionTask",            // Task Name
-                128,                              // Stack Depth
-                this,                             // Task Parameters
-                2,                                // Priority
-                NULL);                            // Storage for task handle
-
-    Serial.print("LEAVE: ");
-    Serial.println(__PRETTY_FUNCTION__);
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-void
-DataAcquisitionTask::RunWrapper(void * pvParameters)
-{
-    // Entry point to the new task
-    DataAcquisitionTask* thisTask =
-        reinterpret_cast<DataAcquisitionTask*>(pvParameters);
-    thisTask->Run();
+    // Nothing to initialize yet - will utilize I2C bus
 }
 
 
@@ -105,9 +78,6 @@ DataAcquisitionTask::Run(void)
         // And print again in a second
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
-
-    Serial.print("LEAVE: ");
-    Serial.println(__PRETTY_FUNCTION__);
 }
 
 

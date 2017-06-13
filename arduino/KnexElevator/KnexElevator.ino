@@ -55,16 +55,17 @@ void setup(void)
 {
     // Debug console
     Serial.begin(115200);
-    Serial.print("ENTER: ");
-    Serial.println(__PRETTY_FUNCTION__);
+    Serial.println("Serial console initialized");
 
-    // Bring up the application tasks
+    // Initialize application tasks
     gvBlinkerTask.Initialize();
     gvDataAcquisitionTask.Initialize();
 
+    // And start them running
+    gvBlinkerTask.Start();
+    gvDataAcquisitionTask.Start();
+
     // FreeRTOS task scheduler takes over from here.
-    Serial.print("LEAVE: ");
-    Serial.println(__PRETTY_FUNCTION__);
     Serial.println("FreeRTOS Scheduler Running...");
     return;
 }
