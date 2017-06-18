@@ -26,64 +26,71 @@
 
 
 // /////////////////////////////////////////////////////////////////////////////
-// Include File(s)
+// Include(s)
 // /////////////////////////////////////////////////////////////////////////////
 #include <Arduino_FreeRTOS.h>
 #include <Arduino.h>
-#include <stdint.h>
 
-#include "BlinkerTask.h"
-#include "DataAcquisitionTask.h"
 #include "CarPositionCalculatorTask.h"
 
 
-// /////////////////////////////////////////////////////////////////////////////
-// Function Prototypes
-// /////////////////////////////////////////////////////////////////////////////
-
-
-// /////////////////////////////////////////////////////////////////////////////
-// Application Global Variable(s)
-// /////////////////////////////////////////////////////////////////////////////
-
-// Application Tasks
-BlinkerTask gvBlinkerTask;
-DataAcquisitionTask gvDataAcquisitionTask;
-CarPositionCalculatorTask gvCarPositionCalculatorTask1("Elevator1");
-CarPositionCalculatorTask gvCarPositionCalculatorTask2("Elevator2");
+////////////////////////////////////////////////////////////////////////////////
+CarPositionCalculatorTask::CarPositionCalculatorTask(String thread_name)
+    : ITask(thread_name.c_str(), ITask::Defaults::Priority, 200)
+    , mc_thread_name(thread_name)
+{
+    // Intentionally left empty
+}
 
 
 ////////////////////////////////////////////////////////////////////////////////
-void setup(void)
+CarPositionCalculatorTask::~CarPositionCalculatorTask(void)
 {
-    // Debug console
-    Serial.begin(115200);
-    Serial.println("Serial console initialized");
-
-    // Initialize application tasks
-    gvBlinkerTask.Initialize();
-    gvDataAcquisitionTask.Initialize();
-    gvCarPositionCalculatorTask1.Initialize();
-    gvCarPositionCalculatorTask2.Initialize();
-
-    // And start them running
-    gvBlinkerTask.Start();
-    gvDataAcquisitionTask.Start();
-    gvCarPositionCalculatorTask1.Start();
-    // gvCarPositionCalculatorTask2.Start();
-
-    // FreeRTOS task scheduler takes over from here.
-    Serial.println("FreeRTOS Scheduler Running...");
-    return;
+    // Intentionally left empty
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
 void
-loop(void)
+CarPositionCalculatorTask::Initialize(void)
 {
-    // NTD
-    // Task scheduler is doing all the magic
+    // Nothing to initialize yet - will utilize I2C bus
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+String
+CarPositionCalculatorTask::get_name(void)
+{
+   return mc_thread_name;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+void
+CarPositionCalculatorTask::Run(void)
+{
+    Serial.print("ENTER: ");
+    Serial.print(__PRETTY_FUNCTION__);
+    Serial.print("->");
+    Serial.println(mc_thread_name);
+
+    while (true)
+    {
+        char timeStampStringBuf[15+1];
+        snprintf(timeStampStringBuf,
+                 sizeof(timeStampStringBuf),
+                 "[%09li]",
+                 micros());
+        Serial.print(timeStampStringBuf);
+        Serial.print(" Hello from ");
+        Serial.print(__PRETTY_FUNCTION__);
+        Serial.print("->");
+        Serial.println(mc_thread_name);
+
+        // And print again in a second
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
 }
 
 

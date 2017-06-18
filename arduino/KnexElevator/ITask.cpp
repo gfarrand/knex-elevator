@@ -97,8 +97,7 @@ void
 ITask::RunWrapper(void * taskParameters)
 {
     // Entry point to the new task
-    ITask* thisTask =
-        reinterpret_cast<ITask*>(taskParameters);
+    ITask* thisTask = reinterpret_cast<ITask*>(taskParameters);
     thisTask->Run();
 }
 
