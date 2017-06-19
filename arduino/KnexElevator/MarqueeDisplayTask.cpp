@@ -26,61 +26,58 @@
 
 
 // /////////////////////////////////////////////////////////////////////////////
-// Include File(s)
+// Include(s)
 // /////////////////////////////////////////////////////////////////////////////
 #include <Arduino_FreeRTOS.h>
 #include <Arduino.h>
-#include <stdint.h>
 
-#include "BlinkerTask.h"
-#include "DataAcquisitionTask.h"
 #include "MarqueeDisplayTask.h"
 
 
-// /////////////////////////////////////////////////////////////////////////////
-// Function Prototypes
-// /////////////////////////////////////////////////////////////////////////////
-
-
-// /////////////////////////////////////////////////////////////////////////////
-// Application Global Variable(s)
-// /////////////////////////////////////////////////////////////////////////////
-
-// Application Tasks
-BlinkerTask gvBlinkerTask;
-DataAcquisitionTask gvDataAcquisitionTask;
-MarqueeDisplayTask gvMarqueeDisplayTask;
+////////////////////////////////////////////////////////////////////////////////
+MarqueeDisplayTask::MarqueeDisplayTask(void)
+    : ITask(__FUNCTION__, ITask::Defaults::Priority, 200)
+{
+    // Intentionally left empty
+}
 
 
 ////////////////////////////////////////////////////////////////////////////////
-void setup(void)
+MarqueeDisplayTask::~MarqueeDisplayTask(void)
 {
-    // Debug console
-    Serial.begin(115200);
-    Serial.println("Serial console initialized");
-
-    // Initialize application tasks
-    gvBlinkerTask.Initialize();
-    gvDataAcquisitionTask.Initialize();
-    gvMarqueeDisplayTask.Initialize();
-
-    // And start them running
-    gvBlinkerTask.Start();
-    gvDataAcquisitionTask.Start();
-    gvMarqueeDisplayTask.Start();
-
-    // FreeRTOS task scheduler takes over from here.
-    Serial.println("FreeRTOS Scheduler Running...");
-    return;
+    // Intentionally left empty
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
 void
-loop(void)
+MarqueeDisplayTask::Initialize(void)
 {
-    // NTD
-    // Task scheduler is doing all the magic
+    // Intentionally left empty for now
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+void
+MarqueeDisplayTask::Run(void)
+{
+    Serial.print("ENTER: ");
+    Serial.println(__PRETTY_FUNCTION__);
+
+    while (true)
+    {
+        char timeStampStringBuf[15+1];
+        snprintf(timeStampStringBuf,
+                 sizeof(timeStampStringBuf),
+                 "[%09li]",
+                 micros());
+        Serial.print(timeStampStringBuf);
+        Serial.print(" Hello from ");
+        Serial.println(__PRETTY_FUNCTION__);
+
+        // And print again in a second
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
 }
 
 
