@@ -28,28 +28,24 @@
 // /////////////////////////////////////////////////////////////////////////////
 // Include File(s)
 // /////////////////////////////////////////////////////////////////////////////
-#include <Arduino_FreeRTOS.h>
 #include <Arduino.h>
 #include <stdint.h>
 
-#include "BlinkerTask.h"
-#include "DataAcquisitionTask.h"
-#include "MarqueeDisplayTask.h"
+#include "Types.h"
+
+using namespace Knex::Elevator;
 
 
 // /////////////////////////////////////////////////////////////////////////////
 // Function Prototypes
 // /////////////////////////////////////////////////////////////////////////////
+void printRawInputs(RawInputs & r_inputs);
+void printRawOutputs(RawOutputs & r_outputs);
 
 
 // /////////////////////////////////////////////////////////////////////////////
 // Application Global Variable(s)
 // /////////////////////////////////////////////////////////////////////////////
-
-// Application Tasks
-BlinkerTask gvBlinkerTask;
-DataAcquisitionTask gvDataAcquisitionTask;
-MarqueeDisplayTask gvMarqueeDisplayTask;
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -59,18 +55,11 @@ void setup(void)
     Serial.begin(115200);
     Serial.println("Serial console initialized");
 
-    // Initialize application tasks
-    gvBlinkerTask.Initialize();
-    gvDataAcquisitionTask.Initialize();
-    gvMarqueeDisplayTask.Initialize();
-
-    // And start them running
-    gvBlinkerTask.Start();
-    gvDataAcquisitionTask.Start();
-    gvMarqueeDisplayTask.Start();
-
-    // FreeRTOS task scheduler takes over from here.
-    Serial.println("FreeRTOS Scheduler Running...");
+    // Enable some debug pins
+    pinMode(8, OUTPUT);
+    pinMode(9, OUTPUT);
+    pinMode(10, OUTPUT);
+    pinMode(11, OUTPUT);
     return;
 }
 
@@ -79,8 +68,126 @@ void setup(void)
 void
 loop(void)
 {
-    // NTD
-    // Task scheduler is doing all the magic
+    // TODO: Wrap a pin toggler in something RAII-ish :)
+    digitalWrite(8, HIGH);
+
+    // -------------------------------------------------------------------------
+    // Get inputs
+    // -------------------------------------------------------------------------
+    // TODO - actually get real values!
+    {
+        RawInputs inputs;
+
+        inputs.mCallButtonStates[FLOOR_ONE][CALL_UP]   = CBTN_REQ_RELEASED;
+        inputs.mCallButtonStates[FLOOR_ONE][CALL_DOWN] = CBTN_REQ_RELEASED;
+        inputs.mCallButtonStates[FLOOR_TWO][CALL_UP]   = CBTN_REQ_RELEASED;
+        inputs.mCallButtonStates[FLOOR_TWO][CALL_DOWN] = CBTN_REQ_RELEASED;
+        inputs.mCallButtonStates[FLOOR_THREE][CALL_UP]   = CBTN_REQ_RELEASED;
+        inputs.mCallButtonStates[FLOOR_THREE][CALL_DOWN] = CBTN_REQ_RELEASED;
+        inputs.mCallButtonStates[FLOOR_FOUR][CALL_UP]   = CBTN_REQ_RELEASED;
+        inputs.mCallButtonStates[FLOOR_FOUR][CALL_DOWN] = CBTN_REQ_RELEASED;
+
+        inputs.mCarDistances[SHAFT_ONE][DIST_SENSOR_ID_BOTTOM] = 400;
+        inputs.mCarDistances[SHAFT_ONE][DIST_SENSOR_ID_TOP]    = 400;
+        inputs.mCarDistances[SHAFT_TWO][DIST_SENSOR_ID_BOTTOM] = 400;
+        inputs.mCarDistances[SHAFT_TWO][DIST_SENSOR_ID_TOP]    = 400;
+
+        printRawInputs(inputs);
+    }
+
+
+    // -------------------------------------------------------------------------
+    // Crunch numbers
+    // -------------------------------------------------------------------------
+    // TODO - actually call functions to do a job!
+
+
+    // -------------------------------------------------------------------------
+    // Set outputs
+    // -------------------------------------------------------------------------
+    // TODO - actually map these outputs to hardware!
+    {
+        RawOutputs outputs;
+
+        outputs.mCallButtonStates[FLOOR_ONE][CALL_UP]   = CBTN_RESP_SERVICED;
+        outputs.mCallButtonStates[FLOOR_ONE][CALL_DOWN] = CBTN_RESP_SERVICED;
+        outputs.mCallButtonStates[FLOOR_TWO][CALL_UP]   = CBTN_RESP_SERVICED;
+        outputs.mCallButtonStates[FLOOR_TWO][CALL_DOWN] = CBTN_RESP_SERVICED;
+        outputs.mCallButtonStates[FLOOR_THREE][CALL_UP]   = CBTN_RESP_SERVICED;
+        outputs.mCallButtonStates[FLOOR_THREE][CALL_DOWN] = CBTN_RESP_SERVICED;
+        outputs.mCallButtonStates[FLOOR_FOUR][CALL_UP]   = CBTN_RESP_SERVICED;
+        outputs.mCallButtonStates[FLOOR_FOUR][CALL_DOWN] = CBTN_RESP_SERVICED;
+
+        outputs.mServoDriveValues[SHAFT_ONE] = 0;
+        outputs.mServoDriveValues[SHAFT_TWO] = 0;
+
+        outputs.mMarqueeDisplayString = "****";
+
+        printRawOutputs(outputs);
+    }
+
+
+    // So we don't flood the serial port
+    delay(1000);
+
+    // Loop is done, try again next time
+    digitalWrite(8, LOW);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+void printRawInputs(Knex::Elevator::RawInputs & r_inputs)
+{
+    Serial.println("-- INPUTS --");
+    Serial.print("Call Button States (U/D):  ");
+    for (int floor_id = BOTTOM_FLOOR; floor_id <= TOP_FLOOR; floor_id += 1)
+    {
+        Serial.print(r_inputs.mCallButtonStates[floor_id][CALL_UP]);
+        Serial.print("/");
+        Serial.print(r_inputs.mCallButtonStates[floor_id][CALL_DOWN]);
+        Serial.print(", ");
+    }
+    Serial.println("");
+
+    Serial.print("Distance Values (B/T):");
+    for (int shaft_id = FIRST_SHAFT; shaft_id <= LAST_SHAFT; shaft_id += 1)
+    {
+        Serial.print(r_inputs.mCarDistances[shaft_id][DIST_SENSOR_ID_BOTTOM]);
+        Serial.print("/");
+        Serial.print(r_inputs.mCarDistances[shaft_id][DIST_SENSOR_ID_TOP]);
+        Serial.print(", ");
+    }
+    Serial.println("");
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+void printRawOutputs(Knex::Elevator::RawOutputs & r_outputs)
+{
+    Serial.println("-- OUTPUTS --");
+    Serial.print("Buttons: ");
+    for (int floor_id = BOTTOM_FLOOR; floor_id <= TOP_FLOOR; floor_id += 1)
+    {
+        Serial.print(r_outputs.mCallButtonStates[floor_id][CALL_UP]);
+        Serial.print("/");
+        Serial.print(r_outputs.mCallButtonStates[floor_id][CALL_DOWN]);
+        Serial.print(", ");
+    }
+    Serial.println("");
+
+    Serial.print("Servos: ");
+    for (int shaft_id = FIRST_SHAFT; shaft_id <= LAST_SHAFT; shaft_id += 1)
+    {
+        Serial.print(r_outputs.mServoDriveValues[shaft_id]);
+        Serial.print(", ");
+    }
+    Serial.println("");
+
+    Serial.print("Marquee: ");
+    Serial.print("'");
+    Serial.print(r_outputs.mMarqueeDisplayString);
+    Serial.print("'");
+    Serial.println("");
 }
 
 
